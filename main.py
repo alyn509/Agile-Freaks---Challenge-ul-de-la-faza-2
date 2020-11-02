@@ -1,7 +1,8 @@
-import json
 import math
+import csv
 import requests
 from bs4 import BeautifulSoup
+import sys
 
 
 def get_distance(loc1, loc2):
@@ -15,20 +16,27 @@ def get_distance(loc1, loc2):
 # geo_json = json.loads(geo_req.text)
 # my_location = [float(geo_json['latitude']), float(geo_json['longitude'])]
 
-
-my_location = [0, 0]
-page = requests.get("https://raw.githubusercontent.com/Agilefreaks/test_oop/master/coffee_shops.csv")
+if not (len(sys.argv) > 2 and (type(sys.argv[1]) == int or float) and (type(sys.argv[2]) == int or float)):
+    print("In order to proceed please provide arguments for this call having the following order: \n "
+          "<user x coordinate> <user y coordinate> <shop data url>")
+    quit()
+my_location = [float(sys.argv[1]), float(sys.argv[2])]
+page = requests.get(sys.argv[3])
 soup = BeautifulSoup(page.text, 'html.parser')
+print(soup)
+locations = str(soup).split('\n')
+print(locations)
+
 
 # print(soup)
 coffee_shops = []
-locations = str(soup).split('\n')
-shortest_distance = math.inf
 for loc in locations:
     data = str(loc).split(",")
     dist = get_distance(my_location, [float(data[1]), float(data[2])])
     coffee_shops.append([data[0], float(data[1]), float(data[2]), dist])
+coffee_shops.sort(key=lambda x: x[3])
 
-print(coffee_shops)
-# coffee_shops = coffee_shops[coffee_shops[:, 3].argsort()]
-# print(coffee_shops)
+for i in range(3):
+    if not coffee_shops[i]:
+        break
+    print(coffee_shops[i][0] + "," + str(coffee_shops[i][3]))
