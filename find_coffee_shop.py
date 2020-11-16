@@ -8,7 +8,7 @@ from collections import namedtuple
 NearbyShop = namedtuple("NearbyShop", "name distance")
 
 
-def get_closest_coffee_shops(my_location, locations, number_of_locations = 3):
+def get_closest_coffee_shops(my_location, locations, number_of_locations=3):
     """
     Find out the closest 3 locations from your location.
     :param my_location: is a tuple of 2 floats representing the x and y coordinates
@@ -40,11 +40,12 @@ if __name__ == '__main__':
     my_loc = [args.x, args.y]
 
     http = urllib3.PoolManager()
-    response = http.request('GET', args.shops_url).data.decode('utf-8')
-    if response == "404: Not Found":
-        print("URL provided is not valid", file=sys.stderr)
+    response = http.request('GET', args.shops_url)
+    if response.status != 200:  # checking for the OK status
+        print(f"The URL you provided generated a code {response.status}: {response.reason}", file=sys.stderr)
         exit()
-    cr = csv.reader(response.split("\n"))
+
+    cr = csv.reader(response.data.decode('utf-8').split("\n"))
     coffee_shops = list(cr)
     coffee_shops, found_issues = get_closest_coffee_shops(my_loc, coffee_shops)
 
