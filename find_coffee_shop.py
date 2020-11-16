@@ -40,8 +40,11 @@ if __name__ == '__main__':
     my_loc = [args.x, args.y]
 
     http = urllib3.PoolManager()
-    response = http.request('GET', args.shops_url)
-    cr = csv.reader(response.data.decode('utf-8').split("\n"))
+    response = http.request('GET', args.shops_url).data.decode('utf-8')
+    if response == "404: Not Found":
+        print("URL provided is not valid", file=sys.stderr)
+        exit()
+    cr = csv.reader(response.split("\n"))
     coffee_shops = list(cr)
     coffee_shops, found_issues = get_closest_coffee_shops(my_loc, coffee_shops)
 
